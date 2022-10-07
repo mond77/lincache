@@ -38,7 +38,6 @@ func startAPIServer(apiAddr string, gee *lincache.Group) {
 	http.Handle("/api", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			key := r.URL.Query().Get("key")
-			fmt.Println(key)
 			
 			view, err := gee.Get(key)
 			if err != nil {
@@ -47,7 +46,7 @@ func startAPIServer(apiAddr string, gee *lincache.Group) {
 			}
 			w.Header().Set("Content-Type", "application/octet-stream")
 			w.Write(view.ByteSlice())
-
+			
 		}))
 	log.Println("fontend server is running at", apiAddr)
 	log.Fatal(http.ListenAndServe(apiAddr[7:], nil))

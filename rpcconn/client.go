@@ -25,6 +25,10 @@ type RPCClient struct {
 	sending sync.Mutex
 
 	dest string
+	//wg保护还没完成的请求，保证call都完成后再关闭连接
+	wg sync.WaitGroup
+	//连接只关闭一次
+	once sync.Once
 	conn net.Conn
 
 	//mu sync.Mutex
@@ -49,18 +53,24 @@ func (cli *RPCClient) call(req *pt.Request, resp *pt.Response) error {
 	if cli.close {
 		return errors.New("cli is closed,call failure")
 	}
+	cli.wg.Add(1)
 	call := &Call{
 		req:  req,
 		resp: resp,
 		Done: make(chan *Call),
 	}
-
 	cli.send(call)
 	<-call.Done
-	if !keepalive {
-		cli.conn.Close()
-		cli.conn = nil
-	}
+	cli.wg.Done()
+	go func(){
+		if !keepalive {
+			cli.once.Do(func(){
+				cli.wg.Wait()
+				cli.conn.Close()
+				cli.conn = nil
+			})
+		}
+	}()
 	return call.err
 }
 
@@ -87,12 +97,13 @@ func (call *Call) receive(conn net.Conn) {
 	var err error
 	if err == nil {
 		respbytes := make([]byte,1024)
-		_, err = conn.Read(respbytes)
+		n, err := conn.Read(respbytes)
 		if err != nil {
 			call.err = err
 			call.Done <- call
 			return
 		}
+		respbytes = respbytes[:n]
 		err = proto.Unmarshal(respbytes, call.resp)
 		if err != nil {
 			call.err = err

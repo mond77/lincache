@@ -1,7 +1,6 @@
 package rpcconn
 
 import (
-	"fmt"
 	"lincache"
 	pt "lincache/proto"
 	"log"
@@ -36,11 +35,12 @@ func (s *RPCServer) Accept(l net.Listener) {
 func (s *RPCServer) ServeConn(conn net.Conn) {
 	defer conn.Close()
 	for {
-		reqbytes := make([]byte,1024)
-		_, err := conn.Read(reqbytes)
+		reqbytes := make([]byte, 1024)
+		n, err := conn.Read(reqbytes)
 		if err != nil {
 			continue
 		}
+		reqbytes = reqbytes[:n]
 		req := &pt.Request{}
 		err = proto.Unmarshal(reqbytes, req)
 		if err != nil {
@@ -57,7 +57,6 @@ func (s *RPCServer) ServeConn(conn net.Conn) {
 
 func (s *RPCServer) handleReq(req *pt.Request, conn net.Conn) error {
 	groupname, key := req.GetGroup(), req.GetKey()
-	fmt.Println(groupname, key)
 
 	g := lincache.GetGroup(groupname)
 	v, err := g.Get(key)
