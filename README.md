@@ -21,7 +21,7 @@ cd rpcconn/test
 
 #### ilumination
 
-In the test of rpcconn,we get keys from the api server by the command of "curl "http://localhost:9999/api?key=[key]".The api server communicates with peers from remote server that we replace with localhost socket by rpc call, which is implemented in the rpcconn file.
+In the test of rpcconn,we get keys from the api server by the command of "curl "http://localhost:9999/api?key=[key]". The api server communicates with peers from remote server that we replace with localhost socket by rpc call, which is implemented in the rpcconn file.
 
 #### Some bugs encountered
 
