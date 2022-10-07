@@ -9,7 +9,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var keepalive bool
 
 type Call struct {
 	Seq  uint64
@@ -34,10 +33,11 @@ type RPCClient struct {
 	//mu sync.Mutex
 	pending map[string]*Call
 
-	close bool
+	keepalive bool
+	close     bool
 }
 
-func NewRPCClient(addr string) (*RPCClient, error) {
+func NewRPCClient(addr string,keepalive bool) (*RPCClient, error) {
 	cli := &RPCClient{dest: addr, pending: make(map[string]*Call)}
 	return cli, nil
 }
@@ -62,9 +62,9 @@ func (cli *RPCClient) call(req *pt.Request, resp *pt.Response) error {
 	cli.send(call)
 	<-call.Done
 	cli.wg.Done()
-	go func(){
-		if !keepalive {
-			cli.once.Do(func(){
+	go func() {
+		if !cli.keepalive {
+			cli.once.Do(func() {
 				cli.wg.Wait()
 				cli.conn.Close()
 				cli.conn = nil
@@ -96,7 +96,7 @@ func (cli *RPCClient) send(call *Call) error {
 func (call *Call) receive(conn net.Conn) {
 	var err error
 	if err == nil {
-		respbytes := make([]byte,1024)
+		respbytes := make([]byte, 1024)
 		n, err := conn.Read(respbytes)
 		if err != nil {
 			call.err = err
@@ -116,6 +116,4 @@ func (call *Call) receive(conn net.Conn) {
 
 }
 
-func Setkeepalive(keep bool) {
-	keepalive = keep
-}
+

@@ -9,7 +9,11 @@ import (
 	"sync"
 )
 
-const defaultReplicas = 50
+const (
+	defaultReplicas = 50
+	defaultkeepalive = false
+
+)
 
 type RPCPool struct {
 	addr string
@@ -50,7 +54,7 @@ func(p *RPCPool) Set(peers ...string) {
 	p.peers.Add(peers...)
 	p.rpcGetters = make(map[string]lincache.PeerGetter,len(peers))
 	for _,peer := range peers {
-		cli,_ := NewRPCClient(peer)
+		cli,_ := NewRPCClient(peer,defaultkeepalive)
 		p.rpcGetters[peer] = &RPCGetter{cli}
 	}
 }
