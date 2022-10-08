@@ -4,9 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"lincache"
-	"lincache/rpcconn"
+	tu "lincache/touse"
 	"log"
-	"net/http"
 )
 
 var db = map[string]string{
@@ -24,33 +23,6 @@ func createGroup() *lincache.Group {
 			}
 			return nil, fmt.Errorf("%s not exist", key)
 		}))
-}
-
-func startRPCServer(addr string, addrs []string, gee *lincache.Group) {
-	peers := rpcconn.NewRPCPool(addr)
-	peers.Set(addrs...)
-	gee.RegisterPeers(peers)
-	log.Println("lincache is running at", addr)
-	rpcconn.NewRPCServer(peers.Getaddr())
-}
-
-func startAPIServer(apiAddr string, gee *lincache.Group) {
-	http.Handle("/api", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			key := r.URL.Query().Get("key")
-			
-			view, err := gee.Get(key)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.Header().Set("Content-Type", "application/octet-stream")
-			w.Write(view.ByteSlice())
-			
-		}))
-	log.Println("fontend server is running at", apiAddr)
-	log.Fatal(http.ListenAndServe(apiAddr[7:], nil))
-
 }
 
 func main() {
@@ -74,7 +46,7 @@ func main() {
 
 	gee := createGroup()
 	if api {
-		go startAPIServer(apiAddr, gee)
+		go tu.StartAPIServer(apiAddr, gee)
 	}
-	startRPCServer(addrMap[port], []string(addrs), gee)
+	tu.StartRPCServer(addrMap[port], []string(addrs), gee)
 }
