@@ -37,12 +37,12 @@ type RPCClient struct {
 	close     bool
 }
 
-func NewRPCClient(addr string,keepalive bool) (*RPCClient, error) {
-	cli := &RPCClient{dest: addr, pending: make(map[string]*Call)}
-	return cli, nil
+func NewRPCClient(addr string,keepalive bool) *RPCClient {
+	cli := &RPCClient{dest: addr, pending: make(map[string]*Call),keepalive: keepalive}
+	return cli
 }
 
-func (cli *RPCClient) call(req *pt.Request, resp *pt.Response) error {
+func (cli *RPCClient) call(req *pt.Request, resp *pt.Response)( err error) {
 	if cli.conn == nil {
 		conn, err := net.Dial("tcp", cli.dest)
 		if err != nil {
@@ -59,7 +59,11 @@ func (cli *RPCClient) call(req *pt.Request, resp *pt.Response) error {
 		resp: resp,
 		Done: make(chan *Call),
 	}
-	cli.send(call)
+	err = cli.send(call)
+	if err!=nil{
+		call.err = err
+		return call.err
+	}
 	<-call.Done
 	cli.wg.Done()
 	go func() {

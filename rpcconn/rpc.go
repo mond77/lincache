@@ -54,7 +54,7 @@ func(p *RPCPool) Set(peers ...string) {
 	p.peers.Add(peers...)
 	p.rpcGetters = make(map[string]lincache.PeerGetter,len(peers))
 	for _,peer := range peers {
-		cli,_ := NewRPCClient(peer,defaultkeepalive)
+		cli := NewRPCClient(peer,defaultkeepalive)
 		p.rpcGetters[peer] = &RPCGetter{cli}
 	}
 }
@@ -74,5 +74,5 @@ func (rg *RPCGetter) Get(group string, key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return resp.Value, err
+	return resp.Value, nil
 }
