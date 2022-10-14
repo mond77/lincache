@@ -22,6 +22,7 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 //A Group is a cache namespace and associated data loaded spread over
 type Group struct {
 	name      string    
+	//search locally
 	getter    Getter
 	mainCache cache
 

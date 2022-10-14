@@ -34,7 +34,7 @@ func StartAPIServer(apiAddr string, gee *lincache.Group) {
 				return
 			}
 			w.Header().Set("Content-Type", "application/octet-stream")
-			w.Write(view.ByteSlice())
+			log.Printf("[ApiServer]get key %s,value %v",key,string(view.ByteSlice()))
 
 		}))
 	log.Println("fontend server is running at", apiAddr)
