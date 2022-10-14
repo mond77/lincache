@@ -1,5 +1,5 @@
 # lincache
-distributed k/v cache system with rpc communication surpported
+distributed k/v cache system with rpc communication surpported.most of codes here refer to geecache at https://github.com/geektutu/7days-golang.Thanks for geektutu.
 
 ### httpserver test 
 
