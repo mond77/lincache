@@ -31,3 +31,8 @@ To fix it :	add **sync.WaitGroup** and **sync.Once** to RPCClient making sure th
 
 #### promoting
 test only one group means not overall test with multiple groups.later i will complete it.
+solution:   所有group存在全局变量groups里，
+    peers := lincache.NewHTTPPool(addr)//服务端
+	peers.Set(addrs...)//设置客户端
+	g.RegisterPeers(peers)//为g这个group注册PeerPicker
+    http.ListenAndServe(addr[7:], peers)//启动服务，在本地的groups里的所有group

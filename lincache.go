@@ -22,7 +22,7 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 //A Group is a cache namespace and associated data loaded spread over
 type Group struct {
 	name      string    
-	//search locally
+	//callback search locally
 	getter    Getter
 	mainCache cache
 
@@ -104,6 +104,7 @@ func (g *Group) getLocally(key string) (ByteView, error) {
 	}
 
 	value := ByteView{b: cloneBytes(bytes)}
+	//cachey一但写入无法更新
 	g.populateCache(key, value)
 	return value, nil
 }

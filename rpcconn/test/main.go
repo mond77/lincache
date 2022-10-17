@@ -44,9 +44,9 @@ func main() {
 		addrs = append(addrs, v)
 	}
 
-	gee := createGroup()
+	g := createGroup()
 	if api {
-		go tu.StartAPIServer(apiAddr, gee)
+		go tu.StartAPIServer(apiAddr, g)
 	}
-	tu.StartRPCServer(addrMap[port], []string(addrs), gee)
+	tu.StartRPCServer(addrMap[port], []string(addrs), g)
 }
